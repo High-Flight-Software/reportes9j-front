@@ -1,7 +1,7 @@
 // src/services/conversationService.ts
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3002/conversations';
+const API_URL = process.env.API_URL;
 
 /**
  * Trae las conversaciones paginadas y filtradas.
