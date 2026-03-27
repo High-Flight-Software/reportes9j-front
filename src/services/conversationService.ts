@@ -1,7 +1,11 @@
 // src/services/conversationService.ts
 import axios from 'axios';
 
-const API_URL = process.env.API_URL;
+// Soporta tanto Vite (import.meta.env) como Create React App (process.env)
+const API_URL = 
+  (import.meta as any).env?.VITE_API_URL || 
+  process.env.REACT_APP_API_URL || 
+  'https://reportes9j.hichat.com.ar/api';
 
 /**
  * Trae las conversaciones paginadas y filtradas.
@@ -30,10 +34,6 @@ export const getFilteredConversations = async (
  * Descarga el reporte:
  * - Si pasás fecha => baja 1 XLSX
  * - Si pasás desde+hasta => baja 1 ZIP con 1 XLSX por día
- *
- * @param fecha YYYY-MM-DD (opcional)
- * @param desde YYYY-MM-DD (opcional)
- * @param hasta YYYY-MM-DD (opcional)
  */
 export const downloadConversationsReport = async (
   fecha?: string,
@@ -47,16 +47,13 @@ export const downloadConversationsReport = async (
     if (hasta) params.append('hasta', hasta);
 
     const reportUrl = `${API_URL}/report${params.toString() ? `?${params.toString()}` : ''}`;
-
     console.log(`Downloading report from: ${reportUrl}`);
 
     const response = await axios.get(reportUrl, {
       responseType: 'blob',
     });
 
-    // Si viene rango (desde+hasta) => zip
     const isRange = Boolean(desde && hasta);
-
     const fileName = isRange
       ? `reportes_s9j_${desde}_al_${hasta}.zip`
       : fecha
@@ -86,8 +83,6 @@ export const downloadConversationsReport = async (
 
 /**
  * Llama al endpoint que analiza y envía oportunidades por fecha.
- * @param {string} fecha - Fecha en formato YYYY-MM-DD
- * @returns {Promise<{success: boolean, result: any[]}|{success: false, error: string}>}
  */
 export const reportAndSendOpportunitiesByDate = async (fecha: string) => {
   try {
